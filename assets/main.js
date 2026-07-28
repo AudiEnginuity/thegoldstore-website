@@ -1,0 +1,113 @@
+// ---------- Footer year ----------
+document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());
+
+// ---------- Mobile nav ----------
+const menuOpen = document.getElementById('menuOpen');
+const menuClose = document.getElementById('menuClose');
+const mobileNav = document.getElementById('mobileNav');
+if (menuOpen) menuOpen.addEventListener('click', () => mobileNav.classList.add('open'));
+if (menuClose) menuClose.addEventListener('click', () => mobileNav.classList.remove('open'));
+if (mobileNav) mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileNav.classList.remove('open')));
+
+// ---------- Scroll reveal ----------
+const revealEls = document.querySelectorAll('.reveal');
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('in'), (i % 4) * 90);
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el => io.observe(el));
+} else {
+  revealEls.forEach(el => el.classList.add('in'));
+}
+
+// ---------- FAQ accordion ----------
+document.querySelectorAll('.faq-item').forEach(item => {
+  const q = item.querySelector('.faq-q');
+  const a = item.querySelector('.faq-a');
+  q.addEventListener('click', () => {
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => {
+      i.classList.remove('open');
+      i.querySelector('.faq-a').style.maxHeight = null;
+    });
+    if (!isOpen) {
+      item.classList.add('open');
+      a.style.maxHeight = a.scrollHeight + 'px';
+    }
+  });
+});
+
+// ---------- Spot price ticker ----------
+// To go live: set TICKER_API_URL to an endpoint that returns
+// { gold: <usd per oz>, silver: <usd per oz>, platinum: <usd per oz>, goldChange: <pct>, silverChange: <pct>, platinumChange: <pct> }
+// See SETUP.md for recommended free providers and why a small serverless proxy is worth adding.
+const TICKER_API_URL = ""; // e.g. "/.netlify/functions/spot-prices"
+
+const FALLBACK_PRICES = {
+  gold: 2415.30, goldChange: 0.4,
+  silver: 30.85, silverChange: -0.2,
+  platinum: 985.10, platinumChange: 0.6
+};
+
+function renderTicker(prices, isLive) {
+  const track = document.getElementById('tickerTrack');
+  if (!track) return;
+  const fmt = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const arrow = (chg) => chg >= 0
+    ? `<span class="chg-up">▲ ${fmt(Math.abs(chg))}%</span>`
+    : `<span class="chg-down">▼ ${fmt(Math.abs(chg))}%</span>`;
+
+  const items = `
+    <div class="ticker-item"><span class="ticker-label">${isLive ? 'Live' : 'Sample'} Spot &middot;</span> Gold <strong>$${fmt(prices.gold)}/oz</strong> ${arrow(prices.goldChange)}</div>
+    <div class="ticker-item">Silver <strong>$${fmt(prices.silver)}/oz</strong> ${arrow(prices.silverChange)}</div>
+    <div class="ticker-item">Platinum <strong>$${fmt(prices.platinum)}/oz</strong> ${arrow(prices.platinumChange)}</div>
+    <div class="ticker-item">We buy gold, silver, platinum, coins &amp; gemstones — walk in today</div>
+  `;
+  track.innerHTML = items + items; // duplicate for seamless marquee loop
+}
+
+async function loadTicker() {
+  if (!TICKER_API_URL) {
+    renderTicker(FALLBACK_PRICES, false);
+    return;
+  }
+  const cacheKey = 'goldstore_ticker_cache';
+  const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+  if (cached && (Date.now() - cached.ts) < 4 * 60 * 60 * 1000) {
+    renderTicker(cached.data, true);
+    return;
+  }
+  try {
+    const res = await fetch(TICKER_API_URL);
+    const data = await res.json();
+    localStorage.setItem(cacheKey, JSON.stringify({ data, ts: Date.now() }));
+    renderTicker(data, true);
+  } catch (e) {
+    renderTicker(FALLBACK_PRICES, false);
+  }
+}
+loadTicker();
+
+// ---------- Blog teaser on homepage ----------
+function renderBlogTeaser() {
+  const grid = document.getElementById('blogTeaserGrid');
+  if (!grid || typeof SAMPLE_POSTS === 'undefined') return;
+  const posts = SAMPLE_POSTS.slice(0, 2);
+  grid.innerHTML = posts.map(p => `
+    <a class="blog-card reveal in" href="blog.html?post=${p.slug}">
+      <div class="blog-thumb"><img src="assets/logo.svg" alt=""></div>
+      <div class="blog-body">
+        <span class="blog-tag">${p.tag}</span>
+        <h3>${p.title}</h3>
+        <p>${p.excerpt}</p>
+        <div class="blog-meta"><span>${new Date(p.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} &middot; ${p.readTime}</span><span>Read More →</span></div>
+      </div>
+    </a>
+  `).join('');
+}
+renderBlogTeaser();
