@@ -100,7 +100,7 @@ function renderBlogTeaser() {
   const posts = SAMPLE_POSTS.slice(0, 2);
   grid.innerHTML = posts.map(p => `
     <a class="blog-card reveal in" href="blog.html?post=${p.slug}">
-      <div class="blog-thumb"><img src="assets/logo.svg" alt=""></div>
+      <div class="blog-thumb"><img src="assets/logo.png" alt=""></div>
       <div class="blog-body">
         <span class="blog-tag">${p.tag}</span>
         <h3>${p.title}</h3>

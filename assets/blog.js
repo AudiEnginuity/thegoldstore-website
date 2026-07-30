@@ -82,7 +82,7 @@ function renderListing() {
   }
   grid.innerHTML = posts.map(p => `
     <a class="blog-card" href="blog.html?post=${p.slug}">
-      <div class="blog-thumb"><img src="assets/logo.svg" alt=""></div>
+      <div class="blog-thumb"><img src="assets/logo.png" alt=""></div>
       <div class="blog-body">
         <span class="blog-tag">${p.tag || 'update'}</span>
         <h3>${p.title}</h3>
