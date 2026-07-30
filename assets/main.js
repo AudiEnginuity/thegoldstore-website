@@ -1,4 +1,85 @@
-// ---------- Footer year ----------
+// ---------- Scroll progress + scrollspy ----------
+const progressBar = document.getElementById('scrollProgress');
+const navAnchors = document.querySelectorAll('.nav-links a[href*="#"]');
+const sectionEls = [...navAnchors].map(a => {
+  const id = a.getAttribute('href').split('#')[1];
+  return id ? document.getElementById(id) : null;
+}).filter(Boolean);
+
+function onScroll() {
+  if (progressBar) {
+    const h = document.documentElement;
+    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progressBar.style.width = scrolled + '%';
+  }
+  let current = sectionEls[0];
+  sectionEls.forEach(sec => {
+    if (window.scrollY >= sec.offsetTop - 140) current = sec;
+  });
+  navAnchors.forEach(a => a.classList.remove('active'));
+  if (current) {
+    navAnchors.forEach(a => {
+      if (a.getAttribute('href').endsWith('#' + current.id)) a.classList.add('active');
+    });
+  }
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+// ---------- Hero staggered word reveal (DOM-safe, preserves <em> etc.) ----------
+document.querySelectorAll('.hero h1').forEach(h1 => {
+  let wordIndex = 0;
+  function wrapWords(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const parts = node.textContent.split(/(\s+)/).filter(p => p.length);
+      const frag = document.createDocumentFragment();
+      parts.forEach(part => {
+        if (/^\s+$/.test(part)) {
+          frag.appendChild(document.createTextNode(part));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'word-reveal';
+          span.style.animationDelay = (0.35 + wordIndex * 0.07) + 's';
+          span.textContent = part;
+          wordIndex++;
+          frag.appendChild(span);
+        }
+      });
+      node.replaceWith(frag);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      [...node.childNodes].forEach(wrapWords);
+    }
+  }
+  [...h1.childNodes].forEach(wrapWords);
+});
+
+// ---------- Hero parallax on scroll ----------
+const emblemWrap = document.querySelector('.hero-emblem');
+const heroSection = document.querySelector('.hero');
+if (emblemWrap && heroSection) {
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (y < window.innerHeight) {
+      emblemWrap.style.transform = `translateY(${y * 0.18}px)`;
+    }
+  }, { passive: true });
+}
+
+// ---------- Contained cursor glow in hero ----------
+if (heroSection && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  const glow = document.createElement('div');
+  glow.className = 'cursor-glow';
+  heroSection.appendChild(glow);
+  heroSection.addEventListener('mousemove', (e) => {
+    const r = heroSection.getBoundingClientRect();
+    glow.style.left = (e.clientX - r.left) + 'px';
+    glow.style.top = (e.clientY - r.top) + 'px';
+    glow.style.opacity = '1';
+  });
+  heroSection.addEventListener('mouseleave', () => { glow.style.opacity = '0'; });
+}
+
+
 document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());
 
 // ---------- Mobile nav ----------
