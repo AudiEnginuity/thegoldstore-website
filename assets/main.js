@@ -26,7 +26,65 @@ function onScroll() {
 window.addEventListener('scroll', onScroll, { passive: true });
 onScroll();
 
-// ---------- Hero staggered word reveal (DOM-safe, preserves <em> etc.) ----------
+// ---------- Intro splash: emblem docks from center into hero position ----------
+(function introSplash() {
+  const overlay = document.getElementById('introOverlay');
+  const targetRing = document.querySelector('.hero-emblem .emblem-ring');
+  if (!overlay) return;
+
+  const finish = () => {
+    overlay.classList.add('io-hidden');
+    document.documentElement.style.overflow = '';
+    setTimeout(() => overlay.remove(), 800);
+  };
+
+  try {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const alreadyPlayed = sessionStorage.getItem('introPlayed');
+    if (reduced || alreadyPlayed || !targetRing) { finish(); return; }
+
+    sessionStorage.setItem('introPlayed', '1');
+    document.documentElement.style.overflow = 'hidden';
+
+    const wrapper = overlay.querySelector('.intro-emblem');
+    const cloneRing = overlay.querySelector('.emblem-ring');
+    const baseWidth = cloneRing.offsetWidth;
+
+    // Safety net: if anything goes wrong, never leave the site permanently covered
+    const safety = setTimeout(finish, 4500);
+
+    setTimeout(() => {
+      const targetRect = targetRing.getBoundingClientRect();
+      const cloneRect = cloneRing.getBoundingClientRect();
+      const targetScale = targetRect.width / baseWidth;
+      const dx = (targetRect.left + targetRect.width / 2) - (cloneRect.left + cloneRect.width / 2);
+      const dy = (targetRect.top + targetRect.height / 2) - (cloneRect.top + cloneRect.height / 2);
+
+      wrapper.style.transition = 'transform 1s cubic-bezier(.65,0,.35,1)';
+      overlay.style.transition = 'opacity .6s ease .55s';
+      requestAnimationFrame(() => {
+        wrapper.style.transform = `translate(${dx}px, ${dy}px) scale(${targetScale})`;
+        overlay.classList.add('io-hidden');
+      });
+
+      setTimeout(() => { clearTimeout(safety); finish(); }, 1150);
+    }, 650);
+  } catch (e) {
+    finish();
+  }
+})();
+
+
+document.querySelectorAll('.brand-name').forEach(el => {
+  // First text node only (excludes the nested subtitle span)
+  const firstText = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+  if (firstText) {
+    el.classList.add('shine-text');
+    el.setAttribute('data-text', firstText.textContent.trim());
+  }
+});
+
+// ---------- Hero staggered word reveal (DOM-safe, preserves <em> gradient text intact) ----------
 document.querySelectorAll('.hero h1').forEach(h1 => {
   let wordIndex = 0;
   function wrapWords(node) {
@@ -47,10 +105,28 @@ document.querySelectorAll('.hero h1').forEach(h1 => {
       });
       node.replaceWith(frag);
     } else if (node.nodeType === Node.ELEMENT_NODE) {
-      [...node.childNodes].forEach(wrapWords);
+      if (node.tagName === 'EM') {
+        // Treat the whole <em> phrase as one reveal unit so its gradient
+        // text stays a single continuous run instead of being split apart.
+        const span = document.createElement('span');
+        span.className = 'word-reveal';
+        span.style.animationDelay = (0.35 + wordIndex * 0.07) + 's';
+        wordIndex++;
+        node.replaceWith(span);
+        span.appendChild(node);
+      } else {
+        [...node.childNodes].forEach(wrapWords);
+      }
     }
   }
   [...h1.childNodes].forEach(wrapWords);
+
+  // Apply the shine-sweep overlay to the <em> phrase now that it's intact inside its wrapper span
+  const em = h1.querySelector('em');
+  if (em) {
+    em.classList.add('shine-text');
+    em.setAttribute('data-text', em.textContent);
+  }
 });
 
 // ---------- Hero parallax on scroll ----------
