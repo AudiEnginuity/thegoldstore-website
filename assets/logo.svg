@@ -1,0 +1,19 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0dfae"/>
+      <stop offset="45%" stop-color="#e3bf4e"/>
+      <stop offset="100%" stop-color="#8a6a24"/>
+    </linearGradient>
+  </defs>
+  <!-- egg -->
+  <ellipse cx="100" cy="130" rx="34" ry="42" fill="url(#goldGrad)"/>
+  <!-- bird body -->
+  <path d="M100 88c-16 0-28 12-28 26 0 8 4 14 10 18 6-4 12-6 18-6s12 2 18 6c6-4 10-10 10-18 0-14-12-26-28-26z" fill="url(#goldGrad)"/>
+  <!-- neck + head -->
+  <path d="M96 90c-6-14-4-28 6-36 4 8 10 12 16 12-2 6-8 10-14 10 4 4 6 9 6 14z" fill="url(#goldGrad)"/>
+  <!-- beak -->
+  <path d="M116 62c4-2 9-2 12 1-3 3-8 4-12 2z" fill="url(#goldGrad)"/>
+  <!-- base line -->
+  <rect x="46" y="176" width="108" height="2" fill="url(#goldGrad)"/>
+</svg>

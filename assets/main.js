@@ -111,3 +111,20 @@ function renderBlogTeaser() {
   `).join('');
 }
 renderBlogTeaser();
+
+// ---------- Magnetic card tilt ----------
+function applyTilt(selector) {
+  document.querySelectorAll(selector).forEach(card => {
+    card.style.transformStyle = 'preserve-3d';
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `translateY(-6px) perspective(700px) rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+}
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  applyTilt('.trust-card, .step, .buy-card, .blog-card, .testi-card');
+}
