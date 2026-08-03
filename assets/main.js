@@ -51,8 +51,14 @@ onScroll();
     const baseWidth = cloneRing.offsetWidth;
 
     // Safety net: if anything goes wrong, never leave the site permanently covered
-    const safety = setTimeout(finish, 4500);
+    const safety = setTimeout(finish, 6500);
 
+    // Step 1: dissolve in (fade + un-blur) from nothing, rather than popping in instantly
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => wrapper.classList.add('io-in'));
+    });
+
+    // Step 2: after materializing, hold in place so it registers, then dock into the hero
     setTimeout(() => {
       const targetRect = targetRing.getBoundingClientRect();
       const cloneRect = cloneRing.getBoundingClientRect();
@@ -68,7 +74,7 @@ onScroll();
       });
 
       setTimeout(() => { clearTimeout(safety); finish(); }, 1150);
-    }, 650);
+    }, 2650);
   } catch (e) {
     finish();
   }
