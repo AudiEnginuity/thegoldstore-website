@@ -176,7 +176,7 @@
     box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 0 60px -10px rgba(201,162,39,.25);
   }
   @keyframes spin-rev{to{transform:rotate(-360deg);}}
-  .emblem-core img{width:82px;}
+  .emblem-core img{width:78px;}
   .emblem-text{text-align:center; line-height:1.3;}
   .emblem-title{
     font-family:'Fraunces',serif; font-size:15px; font-weight:600; letter-spacing:.04em;
