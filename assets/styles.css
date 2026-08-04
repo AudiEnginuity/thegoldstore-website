@@ -64,7 +64,7 @@
   }
   nav{display:flex; align-items:center; justify-content:space-between; padding:18px 28px; max-width:1360px; margin:0 auto;}
   .brand{display:flex; align-items:center; gap:12px;}
-  .brand-mark{width:82px;height:82px;flex-shrink:0;object-fit:contain;}
+  .brand-mark{width:164px;height:164px;flex-shrink:0;object-fit:contain;}
   .brand-name{
     font-family:'Fraunces',serif; font-size:20px; font-weight:600; letter-spacing:.01em;
     color:var(--champagne); position:relative; display:inline-block;
@@ -157,7 +157,7 @@
 
   .hero-emblem{position:relative; display:flex; justify-content:center; align-items:center;}
   .emblem-ring{
-    width:440px;height:440px;border-radius:50%;
+    width:880px;height:880px;border-radius:50%;
     border:1px solid var(--hairline-strong);
     display:flex; align-items:center; justify-content:center; position:relative;
     animation:spin 60s linear infinite;
@@ -168,7 +168,7 @@
   .emblem-ring::after{inset:-76px; border-style:solid; border-color:rgba(201,162,39,.08);}
   @keyframes spin{to{transform:rotate(360deg);}}
   .emblem-core{
-    width:340px;height:340px;border-radius:50%;
+    width:680px;height:680px;border-radius:50%;
     background:radial-gradient(circle at 35% 30%, #201d16, #0c0b0a 70%);
     border:1px solid var(--hairline-strong);
     display:flex; align-items:center; justify-content:center;
@@ -176,7 +176,7 @@
     box-shadow:inset 0 0 40px rgba(0,0,0,.6), 0 0 60px -10px rgba(201,162,39,.25);
   }
   @keyframes spin-rev{to{transform:rotate(-360deg);}}
-  .emblem-core img{width:305px;}
+  .emblem-core img{width:610px;}
 
   /* ---------- Ticker ---------- */
   .ticker{
@@ -379,7 +379,7 @@
     height:170px; background:radial-gradient(ellipse at 30% 20%, rgba(201,162,39,.16), transparent 60%), #131114;
     display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--hairline);
   }
-  .blog-thumb img{width:150px; opacity:.9;}
+  .blog-thumb img{width:300px; opacity:.9;}
   .blog-body{padding:26px 26px 28px; flex:1; display:flex; flex-direction:column;}
   .blog-tag{
     align-self:flex-start; font-size:11px; text-transform:uppercase; letter-spacing:.1em; font-weight:700;
