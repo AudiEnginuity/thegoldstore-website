@@ -24,3 +24,57 @@ const SAMPLE_POSTS = [
 ];
 
 if (typeof module !== "undefined") { module.exports = SAMPLE_POSTS; }
+
+// ---------------------------------------------------------------
+// Shared logic for pulling real published posts from GitHub.
+// Used by both the homepage teaser (main.js) and the blog page (blog.js).
+// Once the CMS is connected (see SETUP.md), set GITHUB_REPO below
+// (e.g. "yourusername/thegoldstore") and posts published from /admin
+// will appear on the site automatically — no rebuild or redeploy step.
+// ---------------------------------------------------------------
+const GITHUB_REPO = "AudiEnginuity/thegoldstore-website";
+const POSTS_PATH = "content/blog";
+
+async function fetchPostsFromGitHub() {
+  if (!GITHUB_REPO) return null;
+  try {
+    const listRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${POSTS_PATH}`);
+    if (!listRes.ok) return null;
+    const files = await listRes.json();
+    const mdFiles = files.filter(f => f.name.endsWith('.md'));
+    const posts = await Promise.all(mdFiles.map(async f => {
+      const raw = await (await fetch(f.download_url)).text();
+      return parseFrontmatter(raw, f.name.replace(/\.md$/, ''));
+    }));
+    return posts.filter(Boolean).sort((a, b) => new Date(b.date) - new Date(a.date));
+  } catch (e) {
+    return null;
+  }
+}
+
+// Minimal frontmatter parser for:
+// ---
+// title: "..."
+// date: 2026-01-01
+// tag: gold
+// excerpt: "..."
+// image: /assets/uploads/photo.jpg
+// ---
+// body markdown...
+function parseFrontmatter(raw, slug) {
+  const match = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!match) return null;
+  const [, fm, body] = match;
+  const data = { slug, body: body.trim() };
+  fm.split('\n').forEach(line => {
+    const idx = line.indexOf(':');
+    if (idx === -1) return;
+    const key = line.slice(0, idx).trim();
+    let val = line.slice(idx + 1).trim();
+    val = val.replace(/^["']|["']$/g, '');
+    data[key] = val;
+  });
+  data.readTime = data.readTime || Math.max(1, Math.round(body.split(/\s+/).length / 200)) + ' min';
+  return data;
+}
+

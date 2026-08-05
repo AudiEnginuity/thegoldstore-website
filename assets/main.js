@@ -209,7 +209,7 @@ document.querySelectorAll('.faq-item').forEach(item => {
 // To go live: set TICKER_API_URL to an endpoint that returns
 // { gold: <usd per oz>, silver: <usd per oz>, platinum: <usd per oz>, goldChange: <pct>, silverChange: <pct>, platinumChange: <pct> }
 // See SETUP.md for recommended free providers and why a small serverless proxy is worth adding.
-const TICKER_API_URL = ""; // e.g. "/.netlify/functions/spot-prices"
+const TICKER_API_URL = "/.netlify/functions/spot-prices";
 
 const FALLBACK_PRICES = {
   gold: 2415.30, goldChange: 0.4,
@@ -242,14 +242,14 @@ async function loadTicker() {
   const cacheKey = 'goldstore_ticker_cache';
   const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
   if (cached && (Date.now() - cached.ts) < 4 * 60 * 60 * 1000) {
-    renderTicker(cached.data, true);
+    renderTicker(cached.data, cached.data.source === 'metals.dev');
     return;
   }
   try {
     const res = await fetch(TICKER_API_URL);
     const data = await res.json();
     localStorage.setItem(cacheKey, JSON.stringify({ data, ts: Date.now() }));
-    renderTicker(data, true);
+    renderTicker(data, data.source === 'metals.dev');
   } catch (e) {
     renderTicker(FALLBACK_PRICES, false);
   }
@@ -257,17 +257,24 @@ async function loadTicker() {
 loadTicker();
 
 // ---------- Blog teaser on homepage ----------
-function renderBlogTeaser() {
+async function renderBlogTeaser() {
   const grid = document.getElementById('blogTeaserGrid');
-  if (!grid || typeof SAMPLE_POSTS === 'undefined') return;
-  const posts = SAMPLE_POSTS.slice(0, 2);
+  if (!grid) return;
+  let posts = null;
+  if (typeof fetchPostsFromGitHub === 'function') {
+    posts = await fetchPostsFromGitHub();
+  }
+  if (!posts || !posts.length) {
+    posts = (typeof SAMPLE_POSTS !== 'undefined') ? SAMPLE_POSTS : [];
+  }
+  posts = posts.slice(0, 2);
   grid.innerHTML = posts.map(p => `
     <a class="blog-card reveal in" href="blog.html?post=${p.slug}">
-      <div class="blog-thumb"><img src="assets/logo.png" alt=""></div>
+      <div class="blog-thumb">${p.image ? `<img src="${p.image}" alt="" class="blog-thumb-photo">` : `<img src="assets/logo.png" alt="">`}</div>
       <div class="blog-body">
-        <span class="blog-tag">${p.tag}</span>
+        <span class="blog-tag">${p.tag || 'update'}</span>
         <h3>${p.title}</h3>
-        <p>${p.excerpt}</p>
+        <p>${p.excerpt || p.body.replace(/[#*_>\-]/g, '').slice(0, 140).trim() + '…'}</p>
         <div class="blog-meta"><span>${new Date(p.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} &middot; ${p.readTime}</span><span>Read More →</span></div>
       </div>
     </a>
