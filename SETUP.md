@@ -80,12 +80,18 @@ real margin to spare, and prices still update daily.
 ---
 
 ## Notes on what's already handled
-- **robots.txt** and **sitemap.xml** are included so search engines can find and index the site.
-  The sitemap lists the homepage and blog page; individual blog posts aren't auto-listed since
-  they render dynamically rather than as separate files — this is a minor SEO tradeoff of the
-  no-build-step architecture, not something broken.
+- **Blog posts get their own real page automatically.** Every time you publish a post, a small
+  script (`scripts/build-blog.js`) runs during deploy and generates a standalone page for it at
+  `/blog/<slug>.html`, complete with its own title, meta description, social preview image, and
+  structured data that helps Google and AI search engines (ChatGPT, Perplexity, Google AI
+  Overviews) understand and cite the content properly. You never touch this script — it just runs.
+- **robots.txt** and **sitemap.xml** are included and auto-updated on every deploy so search
+  engines can find and index the site, including every individual blog post.
 - **Mobile sizing** for the logo (header, footer, hero) has been tuned for phone-sized screens,
   separately from the larger desktop sizing.
+- **Netlify's build command is no longer blank** — it now runs `node scripts/build-blog.js` to
+  generate the blog pages above. If you ever see build settings mentioning this, that's expected
+  and correct, not an error.
 
 ## Questions or something not working?
 Bring the exact error message or a screenshot back to this conversation and I'll help you

@@ -269,7 +269,7 @@ async function renderBlogTeaser() {
   }
   posts = posts.slice(0, 2);
   grid.innerHTML = posts.map(p => `
-    <a class="blog-card reveal in" href="blog.html?post=${p.slug}">
+    <a class="blog-card reveal in" href="blog/${p.slug}.html">
       <div class="blog-thumb">${p.image ? `<img src="${p.image}" alt="" class="blog-thumb-photo">` : `<img src="assets/logo.png" alt="">`}</div>
       <div class="blog-body">
         <span class="blog-tag">${p.tag || 'update'}</span>
