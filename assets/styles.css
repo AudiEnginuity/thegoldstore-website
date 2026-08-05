@@ -499,6 +499,14 @@
 .post-view h1{font-size:clamp(30px,4vw,44px); color:var(--ivory); margin:0 0 14px; line-height:1.15;}
 .post-meta{color:var(--ivory-dim); font-size:14px; margin-bottom:34px; display:flex; gap:14px; align-items:center;}
 .post-hero-image{width:100%; border-radius:14px; margin-bottom:36px; border:1px solid var(--hairline);}
+
+.legal-body{color:var(--ivory-dim); font-size:16px; line-height:1.75; padding-bottom:100px;}
+.legal-body p{margin:0 0 20px;}
+.legal-body h3{color:var(--champagne); font-family:'Fraunces',serif; font-size:22px; font-weight:600; margin:40px 0 14px;}
+.legal-body ul{margin:0 0 20px; padding-left:22px;}
+.legal-body li{margin-bottom:8px;}
+.legal-body strong{color:var(--ivory); font-weight:600;}
+.legal-body a{color:var(--gold-bright); font-weight:600;}
 .blog-thumb-photo{width:100%; height:100%; object-fit:cover;}
 .post-body{color:var(--ivory-dim); font-size:17px; line-height:1.85;}
 .post-body p{margin:0 0 22px;}

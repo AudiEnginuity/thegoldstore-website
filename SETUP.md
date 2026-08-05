@@ -60,9 +60,13 @@ The ticker currently shows clearly-labeled **sample** prices until this step is 
    anywhere in the browser or your public code. The ticker will automatically switch from
    "Sample Spot" to "Live" once this is working.
 
-Behind the scenes: the function's response is cached at Netlify's edge for 4 hours, so no matter
-how much traffic the site gets, Metals.Dev only actually gets called a handful of times a day —
-comfortably inside the free tier.
+Behind the scenes: Metals.Dev's free plan caps out at 100 requests/month, and each refresh needs
+3 requests (one per metal). To guarantee we never get close to that limit no matter how much
+traffic the site gets, prices are stored in Netlify's persistent storage (Blobs) with a
+timestamp — the function only calls Metals.Dev again once that stored copy is more than 24 hours
+old. Every visitor in between just gets the stored price, with zero calls to Metals.Dev. That
+caps real usage at roughly 3 requests x 30 refreshes/month ≈ 90/month — under the limit with
+real margin to spare, and prices still update daily.
 
 ## 7. Turn on Google Analytics
 1. Go to **analytics.google.com** and create a free account + property for thegoldstore.net
