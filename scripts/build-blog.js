@@ -253,8 +253,11 @@ function buildPostPage(post) {
 
 // ---------- Main ----------
 function main() {
+  const INDEX_PATH = path.join(ROOT, 'assets', 'posts-index.json');
+
   if (!fs.existsSync(POSTS_DIR)) {
-    console.log('No content/blog directory found - skipping blog page generation.');
+    console.log('No content/blog directory found - writing empty posts index.');
+    fs.writeFileSync(INDEX_PATH, '[]\n');
     return;
   }
 
@@ -289,7 +292,25 @@ function main() {
     `\n</urlset>\n`;
   fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), sitemap);
 
-  console.log(`Built ${posts.length} blog post page(s) and updated sitemap.xml.`);
+  // Write a lightweight local index of all posts (title, tag, excerpt, image,
+  // read time - no full body) that the browser can fetch directly as a normal
+  // same-origin file. This replaces calling GitHub's API from every visitor's
+  // browser, which is rate-limited to 60 requests/hour and was causing the
+  // blog listing to silently fail under moderate testing/traffic.
+  const indexEntries = posts
+    .map(p => ({
+      slug: p.slug,
+      title: p.title,
+      date: p.date,
+      tag: p.tag || 'update',
+      excerpt: p.excerpt || plainTextExcerpt(p.body, 140),
+      image: p.image || null,
+      readTime: p.readTime || estimateReadTime(p.body)
+    }))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  fs.writeFileSync(INDEX_PATH, JSON.stringify(indexEntries, null, 2) + '\n');
+
+  console.log(`Built ${posts.length} blog post page(s), updated sitemap.xml, and wrote posts-index.json.`);
 }
 
 main();

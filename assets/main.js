@@ -261,8 +261,8 @@ async function renderBlogTeaser() {
   const grid = document.getElementById('blogTeaserGrid');
   if (!grid) return;
   let posts = null;
-  if (typeof fetchPostsFromGitHub === 'function') {
-    posts = await fetchPostsFromGitHub();
+  if (typeof fetchPostsIndex === 'function') {
+    posts = await fetchPostsIndex();
   }
   if (!posts || !posts.length) {
     posts = (typeof SAMPLE_POSTS !== 'undefined') ? SAMPLE_POSTS : [];
@@ -274,7 +274,7 @@ async function renderBlogTeaser() {
       <div class="blog-body">
         <span class="blog-tag">${p.tag || 'update'}</span>
         <h3>${p.title}</h3>
-        <p>${p.excerpt || p.body.replace(/[#*_>\-]/g, '').slice(0, 140).trim() + '…'}</p>
+        <p>${p.excerpt}</p>
         <div class="blog-meta"><span>${new Date(p.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} &middot; ${p.readTime}</span><span>Read More →</span></div>
       </div>
     </a>

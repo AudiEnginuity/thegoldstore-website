@@ -1,12 +1,8 @@
-// GITHUB_REPO, fetchPostsFromGitHub(), and parseFrontmatter() now live in
-// blog-data.js so both this page and the homepage teaser can share them.
+// fetchPostsIndex() lives in blog-data.js so both this page and the
+// homepage teaser can share it.
 
 let ALL_POSTS = [];
 let ACTIVE_TAG = 'all';
-
-function excerptFrom(post) {
-  return post.excerpt || post.body.replace(/[#*_>\-]/g, '').slice(0, 140).trim() + '…';
-}
 
 function renderFilter() {
   const el = document.getElementById('blogFilter');
@@ -38,50 +34,26 @@ function renderListing() {
       <div class="blog-body">
         <span class="blog-tag">${p.tag || 'update'}</span>
         <h3>${p.title}</h3>
-        <p>${excerptFrom(p)}</p>
+        <p>${p.excerpt}</p>
         <div class="blog-meta"><span>${new Date(p.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} &middot; ${p.readTime}</span><span>Read More →</span></div>
       </div>
     </a>
   `).join('');
 }
 
-function renderPost(slug) {
-  const post = ALL_POSTS.find(p => p.slug === slug);
-  document.getElementById('listingView').style.display = 'none';
-  document.getElementById('postView').style.display = 'block';
-  if (!post) {
-    document.getElementById('postBody').innerHTML = `<div class="empty-state">That post couldn't be found. <a href="blog.html">Back to all posts.</a></div>`;
-    return;
-  }
-  document.getElementById('postTag').textContent = post.tag || 'update';
-  document.getElementById('postTitle').textContent = post.title;
-  document.getElementById('postDate').textContent = new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  document.getElementById('postRead').textContent = post.readTime;
-  const imageEl = document.getElementById('postImage');
-  if (imageEl) {
-    if (post.image) {
-      imageEl.src = post.image;
-      imageEl.style.display = 'block';
-    } else {
-      imageEl.style.display = 'none';
-    }
-  }
-  document.getElementById('postBody').innerHTML = (typeof marked !== 'undefined')
-    ? marked.parse(post.body)
-    : post.body.split('\n\n').map(p => `<p>${p}</p>`).join('');
-  document.title = `${post.title} — The Gold Store Blog`;
-}
-
 (async function init() {
-  const fromGitHub = await fetchPostsFromGitHub();
-  ALL_POSTS = fromGitHub && fromGitHub.length ? fromGitHub : (typeof SAMPLE_POSTS !== 'undefined' ? SAMPLE_POSTS : []);
-
+  // Old-style links (blog.html?post=slug) now redirect straight to the
+  // real static page for that post, which has proper per-post SEO built in.
   const params = new URLSearchParams(window.location.search);
   const postSlug = params.get('post');
   if (postSlug) {
-    renderPost(postSlug);
-  } else {
-    renderFilter();
-    renderListing();
+    window.location.replace(`blog/${postSlug}.html`);
+    return;
   }
+
+  const posts = await fetchPostsIndex();
+  ALL_POSTS = posts || (typeof SAMPLE_POSTS !== 'undefined' ? SAMPLE_POSTS : []);
+
+  renderFilter();
+  renderListing();
 })();
