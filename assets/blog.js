@@ -34,7 +34,7 @@ function renderListing() {
   }
   grid.innerHTML = posts.map(p => `
     <a class="blog-card" href="blog/${p.slug}.html">
-      <div class="blog-thumb">${post.image ? `<img src="${post.image}" alt="" class="blog-thumb-photo">` : `<img src="assets/logo.png" alt="">`}</div>
+      <div class="blog-thumb">${p.image ? `<img src="${p.image}" alt="" class="blog-thumb-photo">` : `<img src="assets/logo.png" alt="">`}</div>
       <div class="blog-body">
         <span class="blog-tag">${p.tag || 'update'}</span>
         <h3>${p.title}</h3>
