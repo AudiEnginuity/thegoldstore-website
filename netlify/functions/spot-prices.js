@@ -56,7 +56,19 @@ exports.handler = async function () {
 
   let store;
   try {
-    store = getStore("spot-prices-cache");
+    if (!process.env.NETLIFY_AUTH_TOKEN) {
+      console.error("spot-prices function: NETLIFY_AUTH_TOKEN environment variable is not set.");
+    }
+    // Pass credentials explicitly rather than relying on Netlify's automatic
+    // Blobs configuration, which has a known intermittent failure mode
+    // ("MissingBlobsEnvironmentError") across various Netlify deployments.
+    // SITE_ID is auto-provided by Netlify to every function; NETLIFY_AUTH_TOKEN
+    // is a Personal Access Token set manually as an environment variable.
+    store = getStore({
+      name: "spot-prices-cache",
+      siteID: process.env.SITE_ID,
+      token: process.env.NETLIFY_AUTH_TOKEN
+    });
   } catch (err) {
     console.error("spot-prices function: Netlify Blobs unavailable:", err.message);
     return respond(fallback);
