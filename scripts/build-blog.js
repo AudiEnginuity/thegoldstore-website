@@ -252,6 +252,69 @@ function buildPostPage(post) {
 }
 
 // ---------- Main ----------
+// ---------- Pre-rendered card markup (mirrors assets/blog.js / main.js) ----------
+// This is generated once at build time and injected directly into the static
+// HTML, so search engines and AI crawlers that don't execute JavaScript still
+// see real post titles and links. The client-side JS still runs on top of
+// this for the interactive tag-filtering - it just no longer has to build
+// the content from nothing.
+function cardHtml(p) {
+  const dateDisplay = new Date(p.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const thumb = p.image
+    ? `<img src="${p.image}" alt="" class="blog-thumb-photo">`
+    : `<img src="assets/logo.png" alt="">`;
+  return `<a class="blog-card" href="blog/${p.slug}.html">
+      <div class="blog-thumb">${thumb}</div>
+      <div class="blog-body">
+        <span class="blog-tag">${p.tag || 'update'}</span>
+        <h3>${p.title}</h3>
+        <p>${p.excerpt}</p>
+        <div class="blog-meta"><span>${dateDisplay} &middot; ${p.readTime}</span><span>Read More →</span></div>
+      </div>
+    </a>`;
+}
+
+function filterButtonsHtml(indexEntries) {
+  const tags = ['all', ...new Set(indexEntries.map(p => p.tag).filter(Boolean))];
+  return tags.map(t =>
+    `<button data-tag="${t}" class="${t === 'all' ? 'active' : ''}">${t === 'all' ? 'All Posts' : t[0].toUpperCase() + t.slice(1)}</button>`
+  ).join('');
+}
+
+function injectStaticContent(indexEntries) {
+  if (!indexEntries.length) return; // nothing to bake in yet - client JS handles the empty state
+
+  const listingCards = indexEntries.map(cardHtml).join('\n    ');
+  const teaserCards = indexEntries.slice(0, 2).map(p => cardHtml(p).replace('class="blog-card"', 'class="blog-card reveal in"')).join('\n      ');
+  const filterButtons = filterButtonsHtml(indexEntries);
+
+  // blog.html: filter buttons + full listing
+  const blogHtmlPath = path.join(ROOT, 'blog.html');
+  if (fs.existsSync(blogHtmlPath)) {
+    let html = fs.readFileSync(blogHtmlPath, 'utf8');
+    html = html.replace(
+      '<div class="blog-filter" id="blogFilter"></div>',
+      `<div class="blog-filter" id="blogFilter">${filterButtons}</div>`
+    );
+    html = html.replace(
+      '<div class="blog-listing" id="blogListing"></div>',
+      `<div class="blog-listing" id="blogListing">\n    ${listingCards}\n    </div>`
+    );
+    fs.writeFileSync(blogHtmlPath, html);
+  }
+
+  // index.html: homepage teaser (newest 2 posts)
+  const indexHtmlPath = path.join(ROOT, 'index.html');
+  if (fs.existsSync(indexHtmlPath)) {
+    let html = fs.readFileSync(indexHtmlPath, 'utf8');
+    html = html.replace(
+      '<div class="blog-grid" id="blogTeaserGrid">\n      <!-- populated by blog-data.js -->\n    </div>',
+      `<div class="blog-grid" id="blogTeaserGrid">\n      ${teaserCards}\n    </div>`
+    );
+    fs.writeFileSync(indexHtmlPath, html);
+  }
+}
+
 function main() {
   const INDEX_PATH = path.join(ROOT, 'assets', 'posts-index.json');
 
@@ -310,7 +373,11 @@ function main() {
     .sort((a, b) => new Date(b.date) - new Date(a.date));
   fs.writeFileSync(INDEX_PATH, JSON.stringify(indexEntries, null, 2) + '\n');
 
-  console.log(`Built ${posts.length} blog post page(s), updated sitemap.xml, and wrote posts-index.json.`);
+  // Bake real post links/content into blog.html and index.html so they're
+  // not empty to non-JS crawlers (see injectStaticContent above).
+  injectStaticContent(indexEntries);
+
+  console.log(`Built ${posts.length} blog post page(s), updated sitemap.xml, wrote posts-index.json, and injected static blog content.`);
 }
 
 main();
