@@ -281,6 +281,27 @@ function filterButtonsHtml(indexEntries) {
   ).join('');
 }
 
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Replaces everything between two HTML comment markers with fresh content.
+// Deliberately loud on failure: if the markers can't be found (wrong file,
+// markers got edited/removed, line-ending mismatch, etc.), this throws -
+// which fails the Netlify build visibly - rather than silently doing
+// nothing and reporting false success, which is what caused a real bug
+// to ship undetected earlier.
+function replaceBetweenMarkers(html, startMarker, endMarker, innerHtml, fileLabel) {
+  const pattern = new RegExp(escapeRegex(startMarker) + '[\\s\\S]*?' + escapeRegex(endMarker));
+  if (!pattern.test(html)) {
+    throw new Error(
+      `injectStaticContent: could not find markers "${startMarker}" / "${endMarker}" in ${fileLabel}. ` +
+      `Refusing to silently report success - fix the markers in the source file.`
+    );
+  }
+  return html.replace(pattern, `${startMarker}${innerHtml}${endMarker}`);
+}
+
 function injectStaticContent(indexEntries) {
   if (!indexEntries.length) return; // nothing to bake in yet - client JS handles the empty state
 
@@ -291,14 +312,16 @@ function injectStaticContent(indexEntries) {
   // blog.html: filter buttons + full listing
   const blogHtmlPath = path.join(ROOT, 'blog.html');
   if (fs.existsSync(blogHtmlPath)) {
-    let html = fs.readFileSync(blogHtmlPath, 'utf8');
-    html = html.replace(
-      '<div class="blog-filter" id="blogFilter"></div>',
-      `<div class="blog-filter" id="blogFilter">${filterButtons}</div>`
+    // Normalize line endings defensively (Windows/Git CRLF conversion has
+    // caused silent match failures here before) before any matching.
+    let html = fs.readFileSync(blogHtmlPath, 'utf8').replace(/\r\n/g, '\n');
+    html = replaceBetweenMarkers(
+      html, '<!--BLOG_FILTER_START-->', '<!--BLOG_FILTER_END-->',
+      `<div class="blog-filter" id="blogFilter">${filterButtons}</div>`, 'blog.html (filter)'
     );
-    html = html.replace(
-      '<div class="blog-listing" id="blogListing"></div>',
-      `<div class="blog-listing" id="blogListing">\n    ${listingCards}\n    </div>`
+    html = replaceBetweenMarkers(
+      html, '<!--BLOG_LISTING_START-->', '<!--BLOG_LISTING_END-->',
+      `<div class="blog-listing" id="blogListing">\n    ${listingCards}\n    </div>`, 'blog.html (listing)'
     );
     fs.writeFileSync(blogHtmlPath, html);
   }
@@ -306,10 +329,10 @@ function injectStaticContent(indexEntries) {
   // index.html: homepage teaser (newest 2 posts)
   const indexHtmlPath = path.join(ROOT, 'index.html');
   if (fs.existsSync(indexHtmlPath)) {
-    let html = fs.readFileSync(indexHtmlPath, 'utf8');
-    html = html.replace(
-      '<div class="blog-grid" id="blogTeaserGrid">\n      <!-- populated by blog-data.js -->\n    </div>',
-      `<div class="blog-grid" id="blogTeaserGrid">\n      ${teaserCards}\n    </div>`
+    let html = fs.readFileSync(indexHtmlPath, 'utf8').replace(/\r\n/g, '\n');
+    html = replaceBetweenMarkers(
+      html, '<!--BLOG_TEASER_START-->', '<!--BLOG_TEASER_END-->',
+      `<div class="blog-grid" id="blogTeaserGrid">\n      ${teaserCards}\n    </div>`, 'index.html (teaser)'
     );
     fs.writeFileSync(indexHtmlPath, html);
   }
