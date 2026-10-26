@@ -10,7 +10,7 @@ const SAMPLE_POSTS = [
     tag: "gold",
     readTime: "3 min",
     excerpt: "First time selling gold? Here's how our expert testing and transparent pricing make it easy.",
-    body: "First time selling gold? Here's how our expert testing and transparent pricing make it easy.\n\nWhen you walk in, we start by testing the karat and weight of every piece using professional equipment. From there we price against real-time market rates, so the offer you see reflects what the market is doing that day — not a lowball guess.\n\nNo appointment is ever required, and most visits take less than fifteen minutes from walking in to walking out with cash."
+    body: "First time selling gold? Here's how our expert testing and transparent pricing make it easy.\n\nWhen you walk in, we start by testing the karat and weight of every piece using professional equipment. From there we price against real-time market rates, so the offer you see reflects what the market is doing that day — not a lowball guess.\n\nNo appointment is needed Monday through Friday (Saturday is by appointment), and most visits take less than fifteen minutes from walking in to walking out with cash."
   },
   {
     slug: "silver-coins-vs-bullion",
@@ -19,7 +19,7 @@ const SAMPLE_POSTS = [
     tag: "silver",
     readTime: "2 min",
     excerpt: "From American Eagles to bars and rounds — learn how we evaluate silver for the best offer.",
-    body: "From American Eagles to bars and rounds, we evaluate silver a little differently than jewelry.\n\nWe check authenticity, purity, and condition on every coin or bar. Collectible coins may carry a premium above melt value depending on rarity and condition, while bullion rounds and bars are priced primarily on weight and purity.\n\nBring your coins or bullion by any time during business hours — no appointment needed."
+    body: "From American Eagles to bars and rounds, we evaluate silver a little differently than jewelry.\n\nWe check authenticity, purity, and condition on every coin or bar. Collectible coins may carry a premium above melt value depending on rarity and condition, while bullion rounds and bars are priced primarily on weight and purity.\n\nBring your coins or bullion by any time Monday through Friday — no appointment needed (Saturday is by appointment)."
   }
 ];
 

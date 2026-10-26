@@ -229,7 +229,7 @@ function renderTicker(prices, isLive) {
     <div class="ticker-item"><span class="ticker-label">${isLive ? 'Live' : 'Sample'} Spot &middot;</span> Gold <strong>$${fmt(prices.gold)}/oz</strong> ${arrow(prices.goldChange)}</div>
     <div class="ticker-item">Silver <strong>$${fmt(prices.silver)}/oz</strong> ${arrow(prices.silverChange)}</div>
     <div class="ticker-item">Platinum <strong>$${fmt(prices.platinum)}/oz</strong> ${arrow(prices.platinumChange)}</div>
-    <div class="ticker-item">We buy gold, silver, platinum, coins &amp; gemstones — walk in today</div>
+    <div class="ticker-item">We buy gold, silver, platinum, coins &amp; gemstones — walk-ins welcome Mon–Fri</div>
   `;
   track.innerHTML = items + items; // duplicate for seamless marquee loop
 }
